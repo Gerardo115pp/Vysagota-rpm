@@ -240,7 +240,7 @@ func (accounts *AccountsServer) loadAccounts() (err error) {
 	var client *http.Client = new(http.Client)
 
 	echo.Echo(echo.CyanFG, "Requesting pacients data from Storage service")
-	request, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%s/pacients/get", storage_service.Host, storage_service.Port), nil)
+	request, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%s/accounts", storage_service.Host, storage_service.Port), nil)
 	response, err := client.Do(request)
 	if err != nil {
 		return err
@@ -250,23 +250,32 @@ func (accounts *AccountsServer) loadAccounts() (err error) {
 
 	defer response.Body.Close()
 
-	var pacients_data []byte
-	pacients_data, err = ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-	var pacients_data_json []vlibs.Pacient
-	json.Unmarshal(pacients_data, &pacients_data_json)
+	data := &struct {
+		Pacients []vlibs.Pacient `json:"pacients"`
+		Doctors  []vlibs.Doctor  `json:"doctors"`
+	}{}
+
+	var body_data []byte
+	body_data, err = ioutil.ReadAll(response.Body)
 	if err != nil {
 		return err
 	}
 
-	for _, pacient := range pacients_data_json {
+	err = json.Unmarshal(body_data, data)
+	if err != nil {
+		echo.EchoErr(err)
+		return err
+	}
+
+	for _, pacient := range data.Pacients {
 		accounts.pacients[pacient.Uuid] = pacient
 	}
-
 	echo.Echo(echo.GreenFG, fmt.Sprintf("Success: %d pacients data loaded", len(accounts.pacients)))
-	// TODO: load doctors data
+
+	for _, doctor := range data.Doctors {
+		accounts.doctors[doctor.Uuid] = doctor
+	}
+	echo.Echo(echo.GreenFG, fmt.Sprintf("Success: %d doctors data loaded", len(accounts.doctors)))
 
 	return nil
 }

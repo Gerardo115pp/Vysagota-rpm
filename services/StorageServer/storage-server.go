@@ -123,7 +123,7 @@ func (storage *StorageServer) handlePacients(response http.ResponseWriter, reque
 		}
 	case "GET":
 		echo.Echo(echo.BlueFG, "Pacients ", echo.PinkFG, "GET", echo.BlueFG, " request: ", request.URL.Path)
-		var pacients []*vlibs.Pacient
+		var pacients []vlibs.Pacient
 		pacients, err := storage.queryPacients("1") // gets all pacients where 1(that means all)
 		if err != nil {
 			echo.Echo(echo.RedFG, "Cant query pacients")
@@ -151,13 +151,43 @@ func (storage *StorageServer) handleAccounts(response http.ResponseWriter, reque
 	switch request.Method {
 	case "GET":
 		echo.Echo(echo.BlueFG, "Accounts ", echo.PinkFG, "GET", echo.BlueFG, " request: ", request.URL.Path)
-		var pacients []*vlibs.Pacient
+
+		var pacients []vlibs.Pacient
 		pacients, err := storage.queryPacients("1") // gets all pacients where 1(that means all)
+
 		if err != nil {
 			echo.Echo(echo.RedFG, "Cant query pacients")
 			echo.EchoErr(err)
 			response.WriteHeader(500)
 		}
+
+		var doctors []vlibs.Doctor
+		doctors, err = storage.queryDoctors("1") // gets all doctors where 1(that means all)
+		if err != nil {
+			echo.Echo(echo.RedFG, "Cant query doctors")
+			echo.EchoErr(err)
+			response.WriteHeader(500)
+		}
+
+		pacients_bytes, err := json.Marshal(pacients)
+		if err != nil {
+			echo.Echo(echo.RedFG, "Cant marshal pacients")
+			echo.EchoErr(err)
+			response.WriteHeader(500)
+		}
+
+		doctors_bytes, err := json.Marshal(doctors)
+		if err != nil {
+			echo.Echo(echo.RedFG, "Cant marshal doctors")
+			echo.EchoErr(err)
+			response.WriteHeader(500)
+		}
+
+		response.Header().Set("Content-Type", "application/json")
+		var response_data string = fmt.Sprintf("{\"pacients\": %s, \"doctors\": %s}", string(pacients_bytes), string(doctors_bytes))
+
+		response.WriteHeader(200)
+		response.Write([]byte(response_data))
 
 	}
 
@@ -168,6 +198,7 @@ func (storage *StorageServer) run() {
 	storage.router = prouter.CreateRouter()
 
 	storage.router.RegisterRoute(prouter.NewRoute("/pacients/.+", false), storage.handlePacients)
+	storage.router.RegisterRoute(prouter.NewRoute("/accounts", true), storage.handleAccounts)
 
 	storage.router.SetCorsHandler(prouter.CorsAllowAll)
 
@@ -184,8 +215,7 @@ func (storage *StorageServer) queryPacients(where string) ([]vlibs.Pacient, erro
 	conn, err := sql.Open("mysql", storage.createDSN("rpm"))
 	if err != nil {
 		echo.EchoErr(err)
-		response.WriteHeader(500)
-		return
+		return nil, err
 	}
 
 	if where == "" {
@@ -237,9 +267,7 @@ func (storage *StorageServer) queryDoctors(where string) ([]vlibs.Doctor, error)
 
 	conn, err := sql.Open("mysql", storage.createDSN("rpm"))
 	if err != nil {
-		echo.EchoErr(err)
-		response.WriteHeader(500)
-		return
+		return nil, err
 	}
 
 	if where == "" {
