@@ -1,0 +1,8 @@
+node_modules
+MriModelTraining/Alzheimer_s\ Dataset/
+/**/demo_join/
+Documentation/
+web_client/public/*.png
+web_client/public/*.svg
+web_client/public/*.jpg
+*.h5

@@ -1,0 +1,144 @@
+<script>
+    import FieldData from '../classes/FieldData';
+    import { FieldStates } from '../classes/FieldData';
+
+    // Styles
+    export let isClear = false;
+    export let isSquared = false;
+
+    export let field_data = new FieldData("generic-input", /[.\n]+/, "any"); 
+    export let input_label;
+    export let input_padding = "1.5vh 4.2vh";
+    export let onKeypressed;
+    export let onEnterPressed;
+    export let onBlur;
+
+    export let initial_value;
+    export let min = 0;
+    export let max;
+
+    $: state_color = getBorderColor(field_data.state) ;
+
+
+    const awaitKeys = e => {
+        if (e.key.toLowerCase() === 'enter' && onEnterPressed !== undefined) {
+
+            field_data.getField().blur();
+            return onEnterPressed(e);
+            
+        } else if (onKeypressed !== undefined) {
+            
+            return onKeypressed(e);
+        }
+    }
+
+    const handleOutsideClickDetected = e => {
+        if(e.currentTarget === e.target) {
+            e.target.getElementsByTagName("input")[0].focus()
+        }
+    }
+
+    const getBorderColor = state => {
+        switch(state) {
+            case FieldStates.NORMAL:
+                return "--theme-color";
+            case FieldStates.HAS_ERRORS:
+                return "--danger";
+            case FieldStates.READY:
+                return "--ready";
+            default:
+                return "--theme-color"
+        }
+    }
+
+    const composeClassName = () => {
+        let class_name = "input-container";
+
+        class_name += isSquared ? " squared" : "";
+
+        if(isClear) {
+            class_name += " clear-input";
+        }
+        return class_name;
+    }
+</script>
+
+<style>
+    .input-container {
+        box-sizing: border-box;
+        cursor: text;
+        width: 100%;
+        display: flex;
+        border: 2px solid var(--theme-color);
+        border-radius: 9999px;
+        align-items: center;
+    }   
+
+    .input-container label {
+        margin-left: 1vw;
+    }
+
+    .input-container input {
+        font-family: var(--body-font);
+        width: 100%;
+        display: flex;
+        background: none;
+        border: none;
+        color: var(--theme-color);
+        font-size: 1.2rem;
+        padding: 0;
+        align-items: center;
+        outline: none;
+    }
+
+    .input-container input[type='number'] {
+        width: 5rem;
+        text-align: center;
+        -moz-appearance: textfield;
+    }
+
+    .input-container input::placeholder {
+        font-family: var(--body-font);
+        color: var(--dark-color);
+        text-transform: capitalize;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .input-container.clear-input {
+        border: none;
+        border-bottom: 2px solid var(--theme-color);
+        border-radius: 0 !important;
+    }
+
+    .input-container.squared {
+        border-radius: 5px;
+    }
+</style>
+
+<div on:click={handleOutsideClickDetected} style="padding: {input_padding};border-color: var({state_color});" class={composeClassName()}>
+    {#if input_label !== undefined}
+        <label for={field_data.id}>{input_label}:</label>
+    {/if}
+    {#if field_data.type !== "number"}
+        <input id={field_data.id} type={field_data.type}
+            placeholder={field_data.placeholder}
+            on:keydown={awaitKeys}
+            on:blur={onBlur}
+        />
+    {:else}
+        <input id={field_data.id} type={field_data.type}
+            placeholder={field_data.placeholder}
+            on:keydown={awaitKeys}
+            on:blur={onBlur}
+            value={initial_value}
+            min={min}
+            max={max}
+        />
+    {/if}
+
+</div>

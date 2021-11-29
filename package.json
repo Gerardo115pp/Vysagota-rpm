@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "svelte-spa-router": "^3.2.0"
+  },
+  "devDependencies": {
+    "svg-inline-loader": "^0.8.2"
+  }
+}

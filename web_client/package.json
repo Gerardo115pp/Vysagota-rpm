@@ -1,0 +1,42 @@
+{
+  "name": "vysagota_rpm_webclient",
+  "version": "1.0.0",
+  "description": "A free system to do rpm",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "webpack --mode production --env JD_ADDRESS=34.136.125.104:5000",
+    "start": "webpack serve --open --mode development --env JD_ADDRESS=127.0.0.1:4000",
+    "expose": "webpack serve --open --mode development --host 0.0.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gerardo115pp/Vysagota-rpm.git"
+  },
+  "keywords": [
+    "rpm",
+    "medicine",
+    "schedule_management"
+  ],
+  "author": "LiberyLabs",
+  "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/Gerardo115pp/Vysagota-rpm/issues"
+  },
+  "homepage": "https://github.com/Gerardo115pp/Vysagota-rpm#readme",
+  "dependencies": {
+    "svelte": "^3.43.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.8",
+    "@babel/plugin-transform-runtime": "^7.16.0",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.15.8",
+    "@babel/runtime": "^7.16.0",
+    "babel-loader": "^8.2.2",
+    "html-webpack-plugin": "^5.3.2",
+    "svelte-loader": "^3.1.2",
+    "webpack": "^5.57.1",
+    "webpack-cli": "^4.9.0",
+    "webpack-dev-server": "^4.3.1"
+  }
+}

@@ -1,0 +1,42 @@
+{
+	"folders": [
+		{
+			"path": "services/JD",
+			"name": "JD",
+		},
+		{
+			"name": "frontend",
+			"path": "./web_client/"
+		},
+		{
+			"name": "model_training",
+			"path": "./MriModelTraining"
+		},
+		{
+			"name": "IA_Service",
+			"path": "./services/IA_service"
+		},
+		{
+			"name": "user-libarys",
+			"path": "./services/Vysagota-User-Librarys"
+		},
+		{
+			"name": "AccountsServer",
+			"path": "./services/AccountsServer"
+		},
+		{
+			"name": "StorageService",
+			"path": "./services/StorageServer"
+		},
+		{
+			"name": "authorization",
+			"path": "./services/AuthorizationServer"
+		},
+		{
+			"path": "./databases",
+			"name": "databases"
+		}
+	],
+	"settings": {
+	}
+}

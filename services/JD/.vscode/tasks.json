@@ -1,0 +1,157 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+
+    "tasks": [
+        {
+            "label": "run JD",
+            "options": {
+                "cwd": "/home/el_maligno/SoftwareProjects/Vysagota/services/JD",
+                "env": {
+                    "JD_PORT": "4000",
+                    "JD_HOST": "localhost"
+                }
+            },
+            "type": "shell",
+            "command": "go run .",
+            "presentation": {
+                "close": false,
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": false,
+                "revealProblems": "onProblem"
+            }, "group": "build"
+
+        }, 
+        {
+            "label": "debug JD",
+            "options": {
+                "cwd": "/home/el_maligno/SoftwareProjects/Vysagota/services/JD",
+                "env": {
+                    "JD_PORT": "4000",
+                    "JD_HOST": "localhost",
+                    "EDEBUG": "1"
+                }
+            },
+            "type": "shell",
+            "command": "go run .",
+            "presentation": {
+                "close": false,
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true,
+                "revealProblems": "onProblem"
+            }, "group": "test"
+        }, // JD
+        {
+            "label": "Accounts",
+            "options": {
+                "cwd": "/home/el_maligno/SoftwareProjects/Vysagota/services/AccountsServer",
+                "env": {
+                    "ACC_PORT": "3000",
+                    "ACC_HOST": "localhost",
+                    "ACC_DNS": "accounts",
+                    "JD_ADDRESS": "localhost:4000"
+                }
+            },
+            "type": "shell",
+            "command": "go run .",
+            "presentation": {
+                "close": false,
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true,
+                "revealProblems": "onProblem"
+            }
+            
+        }, // Accounts
+        {
+            "label": "Storage",
+            "options": {
+                "cwd": "/home/el_maligno/SoftwareProjects/Vysagota/services/StorageServer",
+                "env": {
+                    "STORAGE_PORT": "3010",
+                    "STORAGE_HOST": "localhost",
+                    "STORAGE_DNS": "storage",
+                    "JD_ADDRESS": "localhost:4000",
+                    "RPM_USER": "root",
+                    "RPM_PASSWORD": "da!nyblue",
+                    "RPM_HOST": "127.0.0.1:3306",
+                    "RPM_DATABASE": "vysagota-rpm"
+                }
+            },
+            "type": "shell",
+            "command": "go run .",
+            "presentation": {
+                "close": false,
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true,
+                "revealProblems": "onProblem"
+            }
+        }, // Storage
+        {
+            "label": "IA",
+            "options": {
+                "cwd": "/home/el_maligno/SoftwareProjects/Vysagota/services/IA_service",
+                "env": {
+                    "IA_PORT": "3020",
+                    "IA_HOST": "localhost",
+                    "IA_DNS": "ia",
+                    "JD_ADDRESS": "localhost:4000"
+                },
+            },
+            "type": "shell",
+            "command": "python IA_server.py",
+            "presentation": {
+                "close": false,
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true,
+                "revealProblems": "onProblem"
+            }
+        }, // IA
+        {
+            "label": "Authorization",
+            "options": {
+                "cwd": "/home/el_maligno/SoftwareProjects/Vysagota/services/AuthorizationServer",
+                "env": {
+                    "AUTH_PORT": "3030",
+                    "AUTH_HOST": "localhost",
+                    "AUTH_DNS": "authorization",
+                    "JD_ADDRESS": "localhost:4000"
+                }
+            },
+            "type": "shell",
+            "command": "go run .",
+            "presentation": {
+                "close": false,
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true,
+                "revealProblems": "onProblem"
+            }
+        }
+    ],
+    "echoCommand": true,
+    "echoStdout": true
+}
