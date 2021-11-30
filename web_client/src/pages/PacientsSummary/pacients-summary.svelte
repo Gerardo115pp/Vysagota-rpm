@@ -20,6 +20,16 @@
         console.log(pacients[index]);
     };
 
+    const isPacientActive = (index) => {
+        const pacient = pacients[index];
+        if (pacient !== undefined) {
+            let last_seen = new Date(pacient.last_seen);
+            return last_seen.getYear() > 0;
+        } else {
+            return undefined;
+        }
+    };
+
 </script>
 
 <div id="pacients-summary" class="page">
@@ -58,6 +68,10 @@
                     <div class="pdc-field">
                         <div class="pdcf-label">appointments</div>
                         <div class="pdcf-value">{active_pacient_index < pacients.length ? pacients[active_pacient_index].appointments_count: ""}</div>
+                    </div>
+                    <div class="pdc-field">
+                        <div class="pdcf-label">last seen</div>
+                        <div class="pdcf-value">{isPacientActive(active_pacient_index) ? new Date(pacients[active_pacient_index]).toDateString() : "Never"}</div>
                     </div>
                 </div>
             </div>

@@ -94,6 +94,9 @@ CREATE TABLE `revisions` (
     CONSTRAINT `r_pacient_fk` FOREIGN KEY (`pacient`) REFERENCES `pacients`(`uuid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Data Dictionary:
+-- FieldName| Constraint | Type | Description
+
 
 DROP TRIGGER IF EXISTS `clean_stats_name`;
 CREATE TRIGGER `clean_stats_name` BEFORE INSERT ON `stats` FOR EACH ROW
