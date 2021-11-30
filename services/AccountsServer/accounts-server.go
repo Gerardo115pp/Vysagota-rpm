@@ -201,7 +201,6 @@ func (accounts *AccountsServer) getUser(response http.ResponseWriter, request *h
 			}
 
 			doctor_data, err := accounts.getDoctorByUsername(username)
-			echo.Echo(echo.GreenFG, fmt.Sprintf("Doctor: %v+", doctor_data))
 			if err == nil {
 				echo.Echo(echo.GreenFG, "Serving doctor data")
 				doctor_json, err := doctor_data.ToJson()

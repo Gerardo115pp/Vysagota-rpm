@@ -8,10 +8,11 @@
     
     export let params = {};
     
+    // DELETE: no longer needed
     const profile_type = params['profile'] != undefined ? params['profile'] : 'user';
     
     const form_data = [
-        new FieldData("pacient_username", /^[a-zA-Z_\d]+$/, "username", "text", true),
+        new FieldData("pacient_username", /^[a-zA-Z\-_\d]+$/, "username", "text", true),
         new FieldData("pacient_password", /^[a-zA-Z_\d]+$/, "password", "password", true)
     ]
     
@@ -36,7 +37,7 @@
             .then(promise => promise.json())
             .then(response => {
                 if (response.status) { 
-                    push(`/${profile_type}`);
+                    push(`/${response.type}`);
                 }
             })
         }
@@ -60,7 +61,7 @@
         </div>
         <div id="form-fields">
             {#each form_data as field}
-                <Input onBlur={isFormReady} onEnterPressed={isFormReady} field_data={field} isSquared={true}/>
+                <Input onBlur={isFormReady} onEnterPressed={redirect} field_data={field} isSquared={true}/>
             {/each}
         </div>
         <div id="controls">

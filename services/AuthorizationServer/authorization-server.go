@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -64,7 +67,6 @@ func (auth *AuthServer) boot() {
 
 	echo.Echo(echo.GreenFG, "JD responded with a 2xx")
 
-	// TODO: Request services data from JD
 	err = auth.loadAccountsServiceData()
 	if err != nil {
 		echo.Echo(echo.OrangeFG, "Accounts service is not up.")
@@ -77,13 +79,107 @@ func (auth *AuthServer) boot() {
 
 func (auth *AuthServer) handleLogin(response http.ResponseWriter, request *http.Request) {
 	echo.Echo(echo.CyanFG, "Handling login request")
+
 	request.ParseMultipartForm(32 << 20)
+
 	var username string = request.FormValue("username")
 	var password string = request.FormValue("password")
 	echo.Echo(echo.CyanFG, "Username: ", username)
 	echo.Echo(echo.CyanFG, "Password: ", password)
-	response.WriteHeader(200)
-	response.Write([]byte("{\"status\": false}"))
+
+	var account_data []byte
+	account_data, err := auth.requestAccountData(username)
+	if err != nil {
+		echo.EchoErr(err)
+		response.WriteHeader(500)
+		return
+	}
+
+	account_type, err := auth.getAccountType(account_data)
+	if err != nil {
+		echo.EchoErr(err)
+		response.WriteHeader(500)
+		return
+	}
+
+	// account_type can either be "patient" or "doctor" nothign else.
+	echo.Echo(echo.CyanFG, "Account type: ", account_type)
+
+	if account_type == "pacient" {
+		//PACIENT
+
+		var pacient *vlibs.Pacient
+
+		account_holder := &struct {
+			UserData *vlibs.Pacient `json:"user_data"`
+			UserType string         `json:"user_type"`
+		}{}
+
+		err = json.Unmarshal(account_data, &account_holder)
+		if err != nil {
+			echo.EchoErr(err)
+			response.WriteHeader(500)
+			return
+		}
+
+		pacient = account_holder.UserData
+
+		password_bytes := sha256.Sum256([]byte(password))
+		password_hash := hex.EncodeToString(password_bytes[:])
+
+		response.WriteHeader(200)
+		if pacient.Password == password_hash {
+			response.Write([]byte(fmt.Sprintf("{\"status\": true, \"type\": \"%s\"}", account_type)))
+		} else {
+			response.Write([]byte("{\"status\": false}"))
+		}
+	} else {
+		//DOCTOR
+		var doctor *vlibs.Doctor
+
+		account_holder := &struct {
+			UserData *vlibs.Doctor `json:"user_data"`
+			UserType string        `json:"user_type"`
+		}{}
+
+		err = json.Unmarshal(account_data, &account_holder)
+		if err != nil {
+			echo.EchoErr(err)
+			response.WriteHeader(500)
+			return
+		}
+
+		doctor = account_holder.UserData
+
+		password_bytes := sha256.Sum256([]byte(password))
+		password_hash := hex.EncodeToString(password_bytes[:])
+
+		response.WriteHeader(200)
+		if doctor.Password == password_hash {
+			response.Write([]byte(fmt.Sprintf("{\"status\": true, \"type\": \"%s\"}", account_type)))
+		} else {
+			response.Write([]byte("{\"status\": false}"))
+		}
+	}
+
+}
+
+func (auth *AuthServer) getAccountType(account_data []byte) (string, error) {
+	// this parses the response from  accounts service which should be a json object with the
+	// format {"user_data": {...}, "user_type": "pacient"|"doctor"}. this function
+	// returns the user-type
+
+	var account_type string
+	var err error
+
+	var account_data_map map[string]interface{}
+	err = json.Unmarshal(account_data, &account_data_map)
+	if err != nil {
+		return "", err
+	}
+
+	account_type = account_data_map["user_type"].(string)
+	return account_type, nil
 }
 
 func (auth *AuthServer) loadAccountsServiceData() (err error) {
@@ -133,6 +229,32 @@ func (auth *AuthServer) requestServiceData(service_name string) (*vlibs.Service,
 	service, err = vlibs.PacientFromMultipart(multipart_data, response.Header.Get("Content-Type"))
 
 	return service, err
+}
+
+func (auth *AuthServer) requestAccountData(username string) ([]byte, error) {
+	var client *http.Client = new(http.Client)
+
+	if _, exist := auth.services["accounts"]; !exist {
+		if err := auth.loadAccountsServiceData(); err != nil {
+			return nil, err
+		}
+	}
+
+	var accounts_service *vlibs.Service = auth.services["accounts"]
+
+	request, _ := http.NewRequest("GET", fmt.Sprintf("http://%s:%s/get-user?username=%s", accounts_service.Host, accounts_service.Port, username), nil)
+	response, err := client.Do(request)
+	if err != nil {
+		return nil, err
+	} else if response.StatusCode >= 300 {
+		return nil, fmt.Errorf("Accounts service responded with a %d for user %s", response.StatusCode, username)
+	}
+
+	defer response.Body.Close()
+	var response_body []byte
+	response_body, err = ioutil.ReadAll(response.Body)
+
+	return response_body, err
 }
 
 func createAuthServer() *AuthServer {
